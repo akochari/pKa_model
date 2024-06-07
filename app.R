@@ -13,9 +13,9 @@ library(caret)
 library(mlr)
 library(xgboost)
 library(shinythemes)
+library(DT)
 
-#load("J:/esp/Personal/AndreaZaliani/ADMET_Data/pKa_chodo/XGBoost_regress_v1.RData")
-#load("J:/esp/Personal/AndreaZaliani/ADMET_Data/pKa_chodo/pKa_chodorowski/XGBOOST_regress_v2_ECFP4.RData")
+load("J:/esp/Personal/AndreaZaliani/ADMET_Data/pKa_chodo/App_ECFP4_pKa/XGBOOST_regress_v2_ECFP4.RData")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
@@ -27,30 +27,38 @@ ui <- fluidPage(
     # Application title
     titlePanel(title=div(img(src="fraunhofer_ITMP-logo_900p.jpg",
                              height="20%", width="20%", align="right"),
-                         "ML Model from Czodorowski pKa dataset v2")),
+                         "XGBoost Model from Czodorowski pKa dataset v2")),
     
-    p("An attempt to model https://github.com/czodrowskilab/Machine-learning-meets-pKa"),
+    p("An attempt to model dataset in https://github.com/czodrowskilab/Machine-learning-meets-pKa"),
     
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
-            sliderInput("Nrounds", "Number of cycles:", min = 300, max = 1000, value = 600),
-            sliderInput("max_depth", "Tree depth:", min = 8, max = 12, value = 10),
-            sliderInput("Eta", "Learning rate:", min = 0, max = 1, value = 0.025),
-            sliderInput("Colsample", "Percentage of columns:", min = 0, max = 1, value = 0.75)
-        ),
-        
-        # Show a plot of the generated distribution
+            sliderInput("Nrounds", "Number of rounds:", min = 300, max = 1000, value = 600),
+            sliderInput("max_depth", "Tree depth:", min = 6, max = 12, value = 10),
+            sliderInput("Eta", "Learning rate:", min = 0.01, max = 1, value = 0.025),
+            sliderInput("Colsample", "Percentage of columns:", min = 0, max = 1, value = 0.75),
+            fileInput("file", 
+                      span("Choose File for predictions ",
+                           tags$a(
+                               "(example)",
+                               href = "#",
+                               onclick = "window.open('J:/esp/Personal/AndreaZaliani/ADMET_Data/pKa_chodo/App_ECFP4_pKa/Capture.jpg', 
+                               'newwindow', 'width=500, height=250'); return false;"
+                           ), 
+                      multiple = FALSE, accept = ".csv"))
+            ),
         mainPanel(
             tabsetPanel(type = "tabs",
                         tabPanel("Training", plotOutput('trainingplot',width = "500px", height = "500px")),
                         tabPanel("Test", plotOutput('testplot',width = "500px", height = "500px")),
-                        tabPanel("TOP10", plotOutput('top10features',width = "500px", height = "500px"))
-                        
+                        tabPanel("TOP10", plotOutput('top10features',width = "500px", height = "500px")),
+                        tabPanel("Predictions", dataTableOutput('tables'))
             )
         )
     )
 )
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output) {
@@ -133,6 +141,41 @@ server <- function(input, output) {
                   axis.title=element_text(size=16,face="bold"))
         
     })
+    
+    pKa_predicted <- reactive({
+        req(input$file)
+        
+        #ext <- tools::file_ext(input$file$name)
+        #switch(ext,
+        #vroom::vroom(input$upload$datapath, delim = ";")
+        read_delim(input$file$datapath, delim = ";")
+        #validate("Invalid file; Please upload a .tsv file")
+        
+    })
+    
+    predictions <- reactive({
+        
+        req(input$file, final_model())
+        
+        pred <- round(predict(final_model(), as.matrix(pKa_predicted()[,-c(1:4)])),4)
+        pred <- as.data.frame(pred, names('pKa_pred'))
+        return(pred)
+        
+        
+        
+    })
+    
+    output$tables <- DT::renderDataTable({
+        DT::datatable(predictions(),
+                      extensions = c('Buttons'),
+                      options = list(
+                          dom = 'frtBip',
+                          buttons = list(list(extend = 'excel', filename = paste0("pKa_pred-", Sys.Date())))
+                      )
+        )
+    })
+    
+    
     
 }
 
