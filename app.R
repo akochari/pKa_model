@@ -15,21 +15,22 @@ library(xgboost)
 library(shinythemes)
 
 #load("J:/esp/Personal/AndreaZaliani/ADMET_Data/pKa_chodo/XGBoost_regress_v1.RData")
+#load("J:/esp/Personal/AndreaZaliani/ADMET_Data/pKa_chodo/pKa_chodorowski/XGBOOST_regress_v2_ECFP4.RData")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
     
     theme = shinytheme("cerulean"),
     
-
+    
     # Application title
     # Application title
     titlePanel(title=div(img(src="fraunhofer_ITMP-logo_900p.jpg",
                              height="20%", width="20%", align="right"),
-                         "ML Model from Czodorowski pKa dataset v1")),
+                         "ML Model from Czodorowski pKa dataset v2")),
     
     p("An attempt to model https://github.com/czodrowskilab/Machine-learning-meets-pKa"),
-
+    
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
@@ -38,14 +39,14 @@ ui <- fluidPage(
             sliderInput("Eta", "Learning rate:", min = 0, max = 1, value = 0.025),
             sliderInput("Colsample", "Percentage of columns:", min = 0, max = 1, value = 0.75)
         ),
-
+        
         # Show a plot of the generated distribution
         mainPanel(
             tabsetPanel(type = "tabs",
                         tabPanel("Training", plotOutput('trainingplot',width = "500px", height = "500px")),
                         tabPanel("Test", plotOutput('testplot',width = "500px", height = "500px")),
                         tabPanel("TOP10", plotOutput('top10features',width = "500px", height = "500px"))
-
+                        
             )
         )
     )
@@ -74,7 +75,7 @@ server <- function(input, output) {
         
         
     })
-        
+    
     y_pred_tr <- reactive({
         
         req(final_model())
@@ -88,7 +89,7 @@ server <- function(input, output) {
         predict(final_model(), as.matrix(test_data[,-c(1,2)]))
         
     })
-        
+    
     output$trainingplot <- renderPlot({
         
         plot(unname(unlist(train_data[,1])), y_pred_tr(), xlab='pKa values', ylab = 'predicted pKa in training')
@@ -97,7 +98,7 @@ server <- function(input, output) {
         legend("bottomright", bty="n", legend=paste("R2 is", 
                                                     format(summary(lm(unname(unlist(train_data[,1]))~y_pred_tr()))$adj.r.squared, digits=4)))
         
-        })
+    })
     
     output$testplot <- renderPlot({
         
@@ -111,7 +112,7 @@ server <- function(input, output) {
         
         #axis(1, labels = "pKa")
         
-        })
+    })
     
     importance_matrix <- reactive({
         
@@ -119,8 +120,8 @@ server <- function(input, output) {
         
         xgb.importance(colnames(train_data[,-c(1,2)]), model = final_model())
         
-        }) 
-        
+    }) 
+    
     output$top10features <- renderPlot({
         
         req(importance_matrix())
@@ -132,7 +133,7 @@ server <- function(input, output) {
                   axis.title=element_text(size=16,face="bold"))
         
     })
-
+    
 }
 
 # Run the application 
