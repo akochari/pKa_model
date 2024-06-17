@@ -15,6 +15,7 @@ library(xgboost)
 library(shinythemes)
 library(DT)
 
+load("XGBOOST_regress_v1.RData")
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
