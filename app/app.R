@@ -128,10 +128,10 @@ server <- function(input, output) {
         
         xgb.importance(colnames(train_data[,-c(1,2)]), model = final_model())
         
-    }) 
+    })
+
+    top10plot <- reactive({ 
     
-    output$top10features <- renderPlot({
-        
         req(importance_matrix())
         
         xgb.ggplot.importance(importance_matrix()[1:10,], rel_to_first = TRUE, xlab = "Relative importance")+
@@ -139,6 +139,11 @@ server <- function(input, output) {
             guides(fill = "none")+
             theme(axis.text=element_text(size=14),
                   axis.title=element_text(size=16,face="bold"))
+    })    
+    
+    output$top10features <- renderPlot({
+        
+        top10plot()   
         
     })
     
