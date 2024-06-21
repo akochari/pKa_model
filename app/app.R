@@ -41,10 +41,8 @@ ui <- fluidPage(
             fileInput("file", 
                       span("Choose File for predictions ",
                            tags$a(
-                               "(example)",
-                               href = "#",
-                               onclick = "window.open('~/Capture.JPG', 
-                               'newwindow', 'width=500, height=250'); return false;"
+                               "(link for example)",
+                               href = "https://github.com/REMEDI4ALL/pKa_model/tree/main/app/Capture.JPG"
                            ), 
                       multiple = FALSE, accept = ".csv"))
             ),
