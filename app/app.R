@@ -43,7 +43,7 @@ ui <- fluidPage(
                            tags$a(
                                "(example)",
                                href = "#",
-                               onclick = "window.open('Capture.jpg', 
+                               onclick = "window.open('~/Capture.JPG', 
                                'newwindow', 'width=500, height=250'); return false;"
                            ), 
                       multiple = FALSE, accept = ".csv"))
@@ -143,7 +143,7 @@ server <- function(input, output) {
     
     output$top10features <- renderPlot({
         
-        top10plot()   
+        print(top10plot())   
         
     })
     
