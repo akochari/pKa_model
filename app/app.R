@@ -34,6 +34,21 @@ ui <- fluidPage(
     # Sidebar with a slider input for number of bins 
     sidebarLayout(
         sidebarPanel(
+            tags$head(tags$style(type="text/css", "
+             #loadmessage {
+               position: fixed;
+               bottom: 0px;
+               left: 0px;
+               width: 100%;
+               padding: 5px 0px 5px 0px;
+               text-align: center;
+               font-weight: bold;
+               font-size: 100%;
+               color: #000000;
+               background-color: #6fa8dc;
+               z-index: 105;
+             }
+          ")),
             sliderInput("Nrounds", "Number of rounds:", min = 300, max = 1000, value = 600),
             sliderInput("max_depth", "Tree depth:", min = 6, max = 12, value = 10),
             sliderInput("Eta", "Learning rate:", min = 0.01, max = 1, value = 0.025),
@@ -44,7 +59,10 @@ ui <- fluidPage(
                                "(link for example)",
                                href = "https://github.com/REMEDI4ALL/pKa_model/tree/main/app/Capture.JPG"
                            ), 
-                      multiple = FALSE, accept = ".csv"))
+                      multiple = FALSE, accept = ".csv")),
+            conditionalPanel(condition="$('html').hasClass('shiny-busy')",
+                             tags$div("Working...",id="loadmessage"))
+            
             ),
         mainPanel(
             tabsetPanel(type = "tabs",
@@ -97,6 +115,7 @@ server <- function(input, output) {
     })
     
     output$trainingplot <- renderPlot({
+        
         
         plot(unname(unlist(train_data[,1])), y_pred_tr(), xlab='pKa values', ylab = 'predicted pKa in training')
         abline(lm(unname(unlist(train_data[,1]))~y_pred_tr()), col = 'green', lwd = 4)
