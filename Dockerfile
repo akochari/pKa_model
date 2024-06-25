@@ -1,4 +1,4 @@
-FROM rocker/shiny:4.1.2
+FROM rocker/shiny:latest
 
 RUN apt-get update && \
     apt-get upgrade -y && \
